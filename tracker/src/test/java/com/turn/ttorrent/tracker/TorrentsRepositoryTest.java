@@ -1,6 +1,6 @@
 package com.turn.ttorrent.tracker;
 
-import com.turn.ttorrent.MockTimeService;
+import com.turn.ttorrent.MutableClock;
 import com.turn.ttorrent.common.protocol.AnnounceRequestMessage;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -132,7 +132,7 @@ public class TorrentsRepositoryTest {
   public void testThatTorrentsCanRemovedFromStorage() throws UnsupportedEncodingException {
     TrackedTorrent torrent = new TrackedTorrent(new byte[]{1, 2, 3});
 
-    MockTimeService timeService = new MockTimeService();
+    MutableClock timeService = new MutableClock();
     timeService.setTime(10000);
     final TrackedPeer peer = new TrackedPeer(torrent, "127.0.0.1", 6881, ByteBuffer.allocate(5), timeService);
     torrent.addPeer(peer);

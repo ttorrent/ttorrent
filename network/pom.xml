@@ -4,7 +4,7 @@
 
     <parent>
         <groupId>com.github.ttorrent</groupId>
-        <artifactId>ttorrent</artifactId>
+        <artifactId>ttorrent-parent</artifactId>
         <version>3.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
@@ -28,5 +28,4 @@
         </dependency>
 
     </dependencies>
-
 </project>

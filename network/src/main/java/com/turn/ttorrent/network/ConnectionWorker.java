@@ -1,15 +1,16 @@
 package com.turn.ttorrent.network;
 
 import com.turn.ttorrent.common.LoggerUtils;
-import com.turn.ttorrent.common.TimeService;
 import com.turn.ttorrent.common.TorrentLoggerFactory;
 import com.turn.ttorrent.network.keyProcessors.CleanupProcessor;
+import com.turn.ttorrent.network.keyProcessors.InvalidKeyProcessor;
 import com.turn.ttorrent.network.keyProcessors.KeyProcessor;
 import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.*;
+import java.time.Clock;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -28,7 +29,7 @@ public class ConnectionWorker implements Runnable {
   private final BlockingQueue<WriteTask> myWriteQueue;
   private final Semaphore mySemaphore;
   private final List<KeyProcessor> myKeyProcessors;
-  private final TimeService myTimeService;
+  private final Clock myTimeService;
   private long lastCleanupTime;
   private volatile int mySelectorTimeoutMillis;
   private volatile long myCleanupTimeoutMillis;
@@ -39,12 +40,12 @@ public class ConnectionWorker implements Runnable {
                    List<KeyProcessor> keyProcessors,
                    int selectorTimeoutMillis,
                    int cleanupTimeoutMillis,
-                   TimeService timeService,
+                   Clock timeService,
                    CleanupProcessor cleanupProcessor,
                    NewConnectionAllower myNewConnectionAllower) {
     this.selector = selector;
     this.myTimeService = timeService;
-    this.lastCleanupTime = timeService.now();
+    this.lastCleanupTime = timeService.millis();
     this.mySelectorTimeoutMillis = selectorTimeoutMillis;
     this.myCleanupTimeoutMillis = cleanupTimeoutMillis;
     this.myCleanupProcessor = cleanupProcessor;
@@ -101,7 +102,7 @@ public class ConnectionWorker implements Runnable {
   }
 
   private void cleanup() {
-    lastCleanupTime = myTimeService.now();
+    lastCleanupTime = myTimeService.millis();
     for (SelectionKey key : selector.keys()) {
       if (!key.isValid()) continue;
       myCleanupProcessor.processCleanup(key);
@@ -109,7 +110,7 @@ public class ConnectionWorker implements Runnable {
   }
 
   private boolean needRunCleanup() {
-    return (myTimeService.now() - lastCleanupTime) > myCleanupTimeoutMillis;
+    return (myTimeService.millis() - lastCleanupTime) > myCleanupTimeoutMillis;
   }
 
   private void processWriteTasks() {

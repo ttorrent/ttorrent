@@ -2,7 +2,6 @@ package com.turn.ttorrent.tracker;
 
 import com.turn.ttorrent.CommunicationManagerFactory;
 import com.turn.ttorrent.TempFiles;
-import com.turn.ttorrent.Utils;
 import com.turn.ttorrent.WaitFor;
 import com.turn.ttorrent.client.CommunicationManager;
 import com.turn.ttorrent.client.SharedTorrent;
@@ -10,10 +9,6 @@ import com.turn.ttorrent.client.storage.FairPieceStorageFactory;
 import com.turn.ttorrent.client.storage.FileCollectionStorage;
 import com.turn.ttorrent.common.*;
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -42,37 +37,12 @@ public class TrackerTest {
 
   public TrackerTest() {
     communicationManagerFactory = new CommunicationManagerFactory();
-    if (Logger.getRootLogger().getAllAppenders().hasMoreElements())
-      return;
-    BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("[%d{MMdd HH:mm:ss,SSS}] %6p - %20.20c - %m %n")));
-    Logger.getRootLogger().setLevel(Utils.getLogLevel());
   }
 
   @BeforeMethod
   protected void setUp() throws Exception {
     tempFiles = new TempFiles();
     startTracker();
-  }
-
-  public void test_tracker_all_ports() throws IOException {
-    final int port = tracker.getAnnounceURI().getPort();
-    final Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
-    while (e.hasMoreElements()) {
-      final NetworkInterface ni = e.nextElement();
-      final Enumeration<InetAddress> addresses = ni.getInetAddresses();
-      while (addresses.hasMoreElements()) {
-        final InetAddress addr = addresses.nextElement();
-        try {
-          Socket s = new Socket(addr, port);
-          s.close();
-        } catch (Exception ex) {
-          if (System.getProperty("java.version").startsWith("1.7.") || addr instanceof Inet4Address) {
-            fail("Unable to connect to " + addr, ex);
-          }
-        }
-      }
-
-    }
   }
 
   public void testPeerWithManyInterfaces() throws Exception {

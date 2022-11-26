@@ -1,11 +1,13 @@
 package com.turn.ttorrent.network;
 
-import com.turn.ttorrent.MockTimeService;
 import com.turn.ttorrent.network.keyProcessors.CleanupProcessor;
 import com.turn.ttorrent.network.keyProcessors.KeyProcessor;
 import org.testng.annotations.Test;
 
 import java.nio.channels.*;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -24,7 +26,7 @@ public class ConnectionWorkerTest {
 
     Selector mockSelector = mock(Selector.class);
     when(mockSelector.select(anyLong())).thenReturn(1).thenThrow(new ClosedSelectorException());
-    when(mockSelector.selectedKeys()).thenReturn(new HashSet<SelectionKey>(Collections.singleton(mockKey)));
+    when(mockSelector.selectedKeys()).thenReturn(new HashSet<>(Collections.singleton(mockKey)));
     when(mockKey.isValid()).thenReturn(true);
     when(mockKey.channel()).thenReturn(channel);
     when(acceptProcessor.accept(mockKey)).thenReturn(true);
@@ -34,7 +36,7 @@ public class ConnectionWorkerTest {
             Arrays.asList(acceptProcessor, notAcceptProcessor),
             10,
             0,
-            new MockTimeService(),
+            Clock.fixed(Instant.EPOCH, ZoneOffset.UTC),
             mock(CleanupProcessor.class),
             mock(NewConnectionAllower.class));
     connectionWorker.run();
@@ -45,4 +47,3 @@ public class ConnectionWorkerTest {
     verifyNoMoreInteractions(notAcceptProcessor);
   }
 }
-

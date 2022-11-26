@@ -1,7 +1,6 @@
 package com.turn.ttorrent.client.network;
 
 import com.turn.ttorrent.TempFiles;
-import com.turn.ttorrent.Utils;
 import com.turn.ttorrent.client.*;
 import com.turn.ttorrent.client.peer.PeerActivityListener;
 import com.turn.ttorrent.client.peer.SharingPeer;
@@ -56,7 +55,6 @@ public class HandshakeReceiverTest {
   @BeforeMethod
   public void setUp() throws Exception {
     myTempFiles = new TempFiles();
-    Logger.getRootLogger().setLevel(Utils.getLogLevel());
     mySelfId = "selfId1selfId2selfId".getBytes();
     ByteBuffer selfId = ByteBuffer.wrap(mySelfId);
     myContext = mock(Context.class);

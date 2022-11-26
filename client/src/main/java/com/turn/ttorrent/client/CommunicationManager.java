@@ -40,6 +40,8 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -418,7 +420,7 @@ public class CommunicationManager implements AnnounceResponseListener, PeerActiv
                     final ServerChannelRegister serverChannelRegister) throws IOException {
     this.myConnectionManager = new ConnectionManager(
             this,
-            new SystemTimeService(),
+            Clock.systemUTC(),
             myInConnectionAllower,
             myOutConnectionAllower,
             selectorFactory,
@@ -667,7 +669,7 @@ public class CommunicationManager implements AnnounceResponseListener, PeerActiv
               new ConnectTask(peer.getIp(),
                       peer.getPort(),
                       connectionListener,
-                      new SystemTimeService().now(),
+                      Clock.systemUTC().millis(),
                       Constants.DEFAULT_CONNECTION_TIMEOUT_MILLIS), 1, TimeUnit.SECONDS);
       if (!connectTaskAdded) {
         logger.info("can not connect to peer {}. Unable to add connect task to connection manager", peer);

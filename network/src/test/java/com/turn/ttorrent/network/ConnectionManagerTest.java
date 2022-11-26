@@ -1,6 +1,5 @@
 package com.turn.ttorrent.network;
 
-import com.turn.ttorrent.MockTimeService;
 import org.apache.log4j.*;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -13,6 +12,9 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
@@ -27,7 +29,6 @@ public class ConnectionManagerTest {
 
   private ConnectionManager myConnectionManager;
   private ExecutorService myExecutorService;
-  private ConnectionListener connectionListener;
   private ConnectionManagerContext myContext;
 
   public ConnectionManagerTest() {
@@ -49,7 +50,7 @@ public class ConnectionManagerTest {
     when(newConnectionAllower.isNewConnectionAllowed()).thenReturn(true);
     myConnectionManager = new ConnectionManager(
             myContext,
-            new MockTimeService(),
+            Clock.fixed(Instant.EPOCH, ZoneOffset.UTC),
             newConnectionAllower,
             newConnectionAllower,
             selectorFactory,
@@ -81,7 +82,7 @@ public class ConnectionManagerTest {
 
     final Semaphore semaphore = new Semaphore(0);
 
-    this.connectionListener = new ConnectionListener() {
+    ConnectionListener connectionListener = new ConnectionListener() {
       @Override
       public void onNewDataAvailable(SocketChannel socketChannel) throws IOException {
         readCount.incrementAndGet();

@@ -1,12 +1,12 @@
 package com.turn.ttorrent.network.keyProcessors;
 
-import com.turn.ttorrent.common.TimeService;
 import com.turn.ttorrent.common.TorrentLoggerFactory;
 import com.turn.ttorrent.network.*;
 import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.nio.channels.*;
+import java.time.Clock;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class AcceptableKeyProcessor implements KeyProcessor {
@@ -15,7 +15,7 @@ public class AcceptableKeyProcessor implements KeyProcessor {
 
   private final Selector mySelector;
   private final String myServerSocketLocalAddress;
-  private final TimeService myTimeService;
+  private final Clock myTimeService;
   private final NewConnectionAllower myNewConnectionAllower;
   private final TimeoutStorage myTimeoutStorage;
   private final AtomicInteger mySendBufferSize;
@@ -23,7 +23,7 @@ public class AcceptableKeyProcessor implements KeyProcessor {
 
   public AcceptableKeyProcessor(Selector selector,
                                 String serverSocketLocalAddress,
-                                TimeService timeService,
+                                Clock timeService,
                                 NewConnectionAllower newConnectionAllower,
                                 TimeoutStorage timeoutStorage,
                                 AtomicInteger sendBufferSize,
@@ -66,7 +66,7 @@ public class AcceptableKeyProcessor implements KeyProcessor {
     stateConnectionListener.onConnectionEstablished(socketChannel);
     socketChannel.configureBlocking(false);
     KeyProcessorUtil.setBuffersSizeIfNecessary(socketChannel, mySendBufferSize.get(), myReceiveBufferSize.get());
-    ReadWriteAttachment keyAttachment = new ReadWriteAttachment(stateConnectionListener, myTimeService.now(), myTimeoutStorage.getTimeoutMillis());
+    ReadWriteAttachment keyAttachment = new ReadWriteAttachment(stateConnectionListener, myTimeService.millis(), myTimeoutStorage.getTimeoutMillis());
     socketChannel.register(mySelector, SelectionKey.OP_READ, keyAttachment);
   }
 

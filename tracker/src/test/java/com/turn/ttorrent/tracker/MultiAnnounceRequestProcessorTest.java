@@ -1,15 +1,10 @@
 package com.turn.ttorrent.tracker;
 
 import com.turn.ttorrent.TempFiles;
-import com.turn.ttorrent.Utils;
 import com.turn.ttorrent.bcodec.BDecoder;
 import com.turn.ttorrent.bcodec.BEValue;
 import com.turn.ttorrent.common.protocol.TrackerMessage;
 import com.turn.ttorrent.common.protocol.http.HTTPAnnounceResponseMessage;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -27,14 +22,6 @@ public class MultiAnnounceRequestProcessorTest {
 
   private Tracker tracker;
   private TempFiles tempFiles;
-
-
-  public MultiAnnounceRequestProcessorTest() {
-    if (Logger.getRootLogger().getAllAppenders().hasMoreElements())
-      return;
-    BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("[%d{MMdd HH:mm:ss,SSS}] %6p - %20.20c - %m %n")));
-    Logger.getRootLogger().setLevel(Utils.getLogLevel());
-  }
 
   @BeforeMethod
   protected void setUp() throws Exception {
@@ -68,14 +55,14 @@ public class MultiAnnounceRequestProcessorTest {
     connection.getOutputStream().write(requestString.toString().getBytes("UTF-8"));
 
     final InputStream inputStream = connection.getInputStream();
+    assertEquals(connection.getResponseCode(), 200);
 
     final BEValue bdecode = BDecoder.bdecode(inputStream);
-
-    assertEquals(tracker.getTrackedTorrents().size(), 5);
     assertEquals(bdecode.getList().size(), 5);
 
-    for (BEValue beValue : bdecode.getList()) {
+    assertEquals(tracker.getTrackedTorrents().size(), 5);
 
+    for (BEValue beValue : bdecode.getList()) {
       final HTTPAnnounceResponseMessage responseMessage = HTTPAnnounceResponseMessage.parse(beValue);
       assertTrue(responseMessage.getPeers().isEmpty());
       assertEquals(1, responseMessage.getComplete());

@@ -1,7 +1,6 @@
 package com.turn.ttorrent.network.keyProcessors;
 
-import com.turn.ttorrent.MockTimeService;
-import com.turn.ttorrent.network.ConnectionListener;
+import com.turn.ttorrent.MutableClock;
 import com.turn.ttorrent.network.TimeoutAttachment;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -16,18 +15,14 @@ import static org.mockito.Mockito.*;
 @Test
 public class CleanupKeyProcessorTest {
 
-  private final int CLOSE_TIMEOUT = 100;
-
-  private MockTimeService myTimeService;
+  private MutableClock myTimeService;
   private TimeoutAttachment myTimeoutAttachment;
   private SelectionKey myKey;
   private SelectableChannel myChannel;
-  private ConnectionListener myConnectionListener;
 
   @BeforeMethod
   public void setUp() throws Exception {
-    myTimeService = new MockTimeService();
-    myConnectionListener = mock(ConnectionListener.class);
+    myTimeService = new MutableClock();
     myTimeoutAttachment = mock(TimeoutAttachment.class);
     myKey = mock(SelectionKey.class);
     myChannel = SocketChannel.open();
@@ -75,7 +70,7 @@ public class CleanupKeyProcessorTest {
     CleanupProcessor cleanupProcessor = new CleanupKeyProcessor(myTimeService);
     cleanupProcessor.processCleanup(myKey);
 
-    verify(myTimeoutAttachment).isTimeoutElapsed(myTimeService.now());
+    verify(myTimeoutAttachment).isTimeoutElapsed(myTimeService.millis());
     verify(myKey, never()).cancel();
   }
 

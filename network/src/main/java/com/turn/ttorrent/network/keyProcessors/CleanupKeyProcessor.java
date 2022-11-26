@@ -1,7 +1,6 @@
 package com.turn.ttorrent.network.keyProcessors;
 
 import com.turn.ttorrent.common.LoggerUtils;
-import com.turn.ttorrent.common.TimeService;
 import com.turn.ttorrent.common.TorrentLoggerFactory;
 import com.turn.ttorrent.network.TimeoutAttachment;
 import org.slf4j.Logger;
@@ -9,14 +8,15 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.time.Clock;
 
 public class CleanupKeyProcessor implements CleanupProcessor {
 
   private final static Logger logger = TorrentLoggerFactory.getLogger(CleanupKeyProcessor.class);
 
-  private final TimeService myTimeService;
+  private final Clock myTimeService;
 
-  public CleanupKeyProcessor(TimeService timeService) {
+  public CleanupKeyProcessor(Clock timeService) {
     this.myTimeService = timeService;
   }
 
@@ -27,7 +27,7 @@ public class CleanupKeyProcessor implements CleanupProcessor {
       key.cancel();
       return;
     }
-    if (attachment.isTimeoutElapsed(myTimeService.now())) {
+    if (attachment.isTimeoutElapsed(myTimeService.millis())) {
 
       SocketChannel channel = KeyProcessorUtil.getCastedChannelOrNull(key);
       if (channel == null) {
@@ -53,6 +53,6 @@ public class CleanupKeyProcessor implements CleanupProcessor {
       key.cancel();
       return;
     }
-    attachment.communicatedNow(myTimeService.now());
+    attachment.communicatedNow(myTimeService.millis());
   }
 }

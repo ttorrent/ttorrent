@@ -1,6 +1,9 @@
 package com.turn.ttorrent.client;
 
-import com.turn.ttorrent.*;
+import com.turn.ttorrent.CommunicationManagerFactory;
+import com.turn.ttorrent.Constants;
+import com.turn.ttorrent.TempFiles;
+import com.turn.ttorrent.WaitFor;
 import com.turn.ttorrent.client.peer.SharingPeer;
 import com.turn.ttorrent.client.storage.EmptyPieceStorageFactory;
 import com.turn.ttorrent.client.storage.FileStorage;
@@ -14,10 +17,6 @@ import com.turn.ttorrent.tracker.TrackedPeer;
 import com.turn.ttorrent.tracker.TrackedTorrent;
 import com.turn.ttorrent.tracker.Tracker;
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
 import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -61,16 +60,12 @@ public class CommunicationManagerTest {
 
   public CommunicationManagerTest() {
     communicationManagerFactory = new CommunicationManagerFactory();
-    if (Logger.getRootLogger().getAllAppenders().hasMoreElements())
-      return;
-    BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("[%d{MMdd HH:mm:ss,SSS} %t] %6p - %20.20c - %m %n")));
   }
 
   @BeforeMethod
   public void setUp() throws IOException {
     tempFiles = new TempFiles();
     communicationManagerList = new ArrayList<CommunicationManager>();
-    Logger.getRootLogger().setLevel(Utils.getLogLevel());
     startTracker();
   }
 
@@ -1269,6 +1264,7 @@ public class CommunicationManagerTest {
       public void run() {
         try {
           TorrentManager torrentManager = leecher.addTorrent(torrentFile.getAbsolutePath(), tempFiles.createTempDir().getAbsolutePath());
+          Thread.sleep(500);
           waitDownloadComplete(torrentManager, 30);
         } catch (ClosedByInterruptException e) {
           interrupted.set(true);

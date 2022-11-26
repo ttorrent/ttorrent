@@ -15,15 +15,12 @@
  */
 package com.turn.ttorrent.tracker;
 
-import com.turn.ttorrent.Constants;
-import com.turn.ttorrent.bcodec.BEValue;
-import com.turn.ttorrent.common.*;
+import com.turn.ttorrent.common.Peer;
+import com.turn.ttorrent.common.TorrentLoggerFactory;
 import org.slf4j.Logger;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.Clock;
 
 
 /**
@@ -48,11 +45,11 @@ public class TrackedPeer extends Peer {
   private static final Logger logger =
           TorrentLoggerFactory.getLogger(TrackedPeer.class);
 
-  private final TimeService myTimeService;
+  private final Clock myTimeService;
+  private final TrackedTorrent torrent;
   private long uploaded;
   private long downloaded;
   private long left;
-  private TrackedTorrent torrent;
 
   /**
    * Represents the state of a peer exchanging on this torrent.
@@ -97,18 +94,18 @@ public class TrackedPeer extends Peer {
    * @param peerId  The byte-encoded peer ID.
    */
   public TrackedPeer(TrackedTorrent torrent, String ip, int port, ByteBuffer peerId) {
-    this(torrent, ip, port, peerId, new SystemTimeService());
+    this(torrent, ip, port, peerId, Clock.systemUTC());
   }
 
   TrackedPeer(TrackedTorrent torrent, String ip, int port,
-              ByteBuffer peerId, TimeService timeService) {
+              ByteBuffer peerId, Clock timeService) {
     super(ip, port, peerId);
     myTimeService = timeService;
     this.torrent = torrent;
 
     // Instantiated peers start in the UNKNOWN state.
     this.state = PeerState.UNKNOWN;
-    this.lastAnnounce = myTimeService.now();
+    this.lastAnnounce = myTimeService.millis();
 
     this.uploaded = 0;
     this.downloaded = 0;
@@ -136,15 +133,13 @@ public class TrackedPeer extends Peer {
 
     if (!state.equals(this.state)) {
       logger.trace("Peer {} {} download of {}.",
-              new Object[]{
-                      this,
-                      state.name().toLowerCase(),
-                      this.torrent,
-              });
+              this,
+              state.name().toLowerCase(),
+              this.torrent);
     }
 
     this.state = state;
-    this.lastAnnounce = myTimeService.now();
+    this.lastAnnounce = myTimeService.millis();
     this.uploaded = uploaded;
     this.downloaded = downloaded;
     this.left = left;
@@ -188,24 +183,7 @@ public class TrackedPeer extends Peer {
    * Tracker.
    * </p>
    */
-  public boolean isFresh(int expireTimeoutSec) {
-    return this.lastAnnounce + expireTimeoutSec * 1000 > myTimeService.now();
-  }
-
-  /**
-   * Returns a BEValue representing this peer for inclusion in an
-   * announce reply from the tracker.
-   * <p>
-   * The returned BEValue is a dictionary containing the peer ID (in its
-   * original byte-encoded form), the peer's IP and the peer's port.
-   */
-  public BEValue toBEValue() throws UnsupportedEncodingException {
-    Map<String, BEValue> peer = new HashMap<String, BEValue>();
-    if (this.hasPeerId()) {
-      peer.put("peer id", new BEValue(this.getPeerIdArray()));
-    }
-    peer.put("ip", new BEValue(this.getIp(), Constants.BYTE_ENCODING));
-    peer.put("port", new BEValue(this.getPort()));
-    return new BEValue(peer);
+  public boolean isFresh(long expireTimeoutSec) {
+    return this.lastAnnounce + expireTimeoutSec * 1000 > myTimeService.millis();
   }
 }

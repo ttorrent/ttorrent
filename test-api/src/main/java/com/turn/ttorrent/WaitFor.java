@@ -1,7 +1,7 @@
 package com.turn.ttorrent;
 
 public abstract class WaitFor {
-  public static final long POLL_INTERVAL = 500;
+  public static final long POLL_INTERVAL = 50;
 
   private boolean myResult = false;
 

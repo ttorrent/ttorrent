@@ -1,7 +1,6 @@
 package com.turn.ttorrent.network;
 
 import com.turn.ttorrent.common.LoggerUtils;
-import com.turn.ttorrent.common.TimeService;
 import com.turn.ttorrent.common.TorrentLoggerFactory;
 import com.turn.ttorrent.network.keyProcessors.*;
 import org.slf4j.Logger;
@@ -11,6 +10,7 @@ import java.nio.channels.Channel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
+import java.time.Clock;
 import java.util.Arrays;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -25,7 +25,7 @@ public class ConnectionManager {
   private static final Logger logger = TorrentLoggerFactory.getLogger(ConnectionManager.class);
 
   private final Selector selector;
-  private final TimeService myTimeService;
+  private final Clock myTimeService;
   private volatile ConnectionWorker myConnectionWorker;
   private int myBindPort;
   private final ConnectionManagerContext myContext;
@@ -39,7 +39,7 @@ public class ConnectionManager {
   private final AtomicInteger myReceiveBufferSize;
 
   public ConnectionManager(ConnectionManagerContext context,
-                           TimeService timeService,
+                           Clock timeService,
                            NewConnectionAllower newIncomingConnectionAllower,
                            NewConnectionAllower newOutgoingConnectionAllower,
                            SelectorFactory selectorFactory,

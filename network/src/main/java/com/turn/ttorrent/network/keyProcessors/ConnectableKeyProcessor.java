@@ -1,6 +1,5 @@
 package com.turn.ttorrent.network.keyProcessors;
 
-import com.turn.ttorrent.common.TimeService;
 import com.turn.ttorrent.common.TorrentLoggerFactory;
 import com.turn.ttorrent.network.ConnectTask;
 import com.turn.ttorrent.network.ConnectionListener;
@@ -15,6 +14,7 @@ import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.time.Clock;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ConnectableKeyProcessor implements KeyProcessor {
@@ -22,13 +22,13 @@ public class ConnectableKeyProcessor implements KeyProcessor {
   private static final Logger logger = TorrentLoggerFactory.getLogger(ConnectableKeyProcessor.class);
 
   private final Selector mySelector;
-  private final TimeService myTimeService;
+  private final Clock myTimeService;
   private final TimeoutStorage myTimeoutStorage;
   private final AtomicInteger mySendBufferSize;
   private final AtomicInteger myReceiveBufferSize;
 
   public ConnectableKeyProcessor(Selector selector,
-                                 TimeService timeService,
+                                 Clock timeService,
                                  TimeoutStorage timeoutStorage,
                                  AtomicInteger sendBufferSize,
                                  AtomicInteger receiveBufferSize) {
@@ -75,7 +75,7 @@ public class ConnectableKeyProcessor implements KeyProcessor {
     }
     socketChannel.configureBlocking(false);
     KeyProcessorUtil.setBuffersSizeIfNecessary(socketChannel, mySendBufferSize.get(), myReceiveBufferSize.get());
-    ReadWriteAttachment keyAttachment = new ReadWriteAttachment(connectionListener, myTimeService.now(), myTimeoutStorage.getTimeoutMillis());
+    ReadWriteAttachment keyAttachment = new ReadWriteAttachment(connectionListener, myTimeService.millis(), myTimeoutStorage.getTimeoutMillis());
     socketChannel.register(mySelector, SelectionKey.OP_READ, keyAttachment);
     logger.debug("setup new TCP connection with {}", socketChannel);
     connectionListener.onConnectionEstablished(socketChannel);

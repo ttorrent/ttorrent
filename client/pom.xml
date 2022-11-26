@@ -18,13 +18,11 @@
             <artifactId>ttorrent-bencoding</artifactId>
             <version>3.0.0-SNAPSHOT</version>
         </dependency>
-
         <dependency>
             <groupId>com.github.ttorrent</groupId>
             <artifactId>ttorrent-network</artifactId>
             <version>3.0.0-SNAPSHOT</version>
         </dependency>
-
         <dependency>
             <groupId>com.github.ttorrent</groupId>
             <artifactId>ttorrent-common</artifactId>
@@ -39,5 +37,4 @@
         </dependency>
 
     </dependencies>
-
 </project>
