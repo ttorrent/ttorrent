@@ -18,18 +18,17 @@ package com.turn.ttorrent.client.strategy;
 
 public interface RequestsCollection {
 
-  void sendAllRequests();
+    void sendAllRequests();
 
-  final class Empty implements RequestsCollection {
+    final class Empty implements RequestsCollection {
 
-    public final static Empty INSTANCE = new Empty();
+        public static final Empty INSTANCE = new Empty();
 
-    private Empty() {
+        private Empty() {}
+
+        @Override
+        public void sendAllRequests() {
+            // do nothing
+        }
     }
-
-    @Override
-    public void sendAllRequests() {
-      //do nothing
-    }
-  }
 }

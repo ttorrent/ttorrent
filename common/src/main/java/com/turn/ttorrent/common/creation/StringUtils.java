@@ -20,15 +20,15 @@ import java.util.Iterator;
 
 public final class StringUtils {
 
-  public static String join(String delimiter, Iterable<? extends CharSequence> iterable) {
-    Iterator<? extends CharSequence> iterator = iterable.iterator();
-    StringBuilder sb = new StringBuilder();
-    if (iterator.hasNext()) {
-      sb.append(iterator.next());
+    public static String join(String delimiter, Iterable<? extends CharSequence> iterable) {
+        Iterator<? extends CharSequence> iterator = iterable.iterator();
+        StringBuilder sb = new StringBuilder();
+        if (iterator.hasNext()) {
+            sb.append(iterator.next());
+        }
+        while (iterator.hasNext()) {
+            sb.append(delimiter).append(iterator.next());
+        }
+        return sb.toString();
     }
-    while (iterator.hasNext()) {
-      sb.append(delimiter).append(iterator.next());
-    }
-    return sb.toString();
-  }
 }

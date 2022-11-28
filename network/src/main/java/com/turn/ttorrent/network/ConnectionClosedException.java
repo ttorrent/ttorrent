@@ -20,10 +20,9 @@ import java.io.IOException;
 
 public class ConnectionClosedException extends IOException {
 
-  public ConnectionClosedException() {
-  }
+    public ConnectionClosedException() {}
 
-  public ConnectionClosedException(Throwable cause) {
-    super(cause);
-  }
+    public ConnectionClosedException(Throwable cause) {
+        super(cause);
+    }
 }

@@ -24,53 +24,51 @@ import java.util.List;
 
 class CommonHashingCalculator {
 
-  static final CommonHashingCalculator INSTANCE = new CommonHashingCalculator();
+    static final CommonHashingCalculator INSTANCE = new CommonHashingCalculator();
 
-  List<Long> processDataSources(List<DataSourceHolder> sources,
-                                int pieceSize,
-                                Processor processor) throws IOException {
-    List<Long> sourcesSizes = new ArrayList<Long>();
-    byte[] buffer = new byte[pieceSize];
-    int read = 0;
-    for (DataSourceHolder source : sources) {
-      long streamSize = 0;
-      InputStream stream = source.getStream();
-      try {
-        while (true) {
-          int readFromStream = stream.read(buffer, read, buffer.length - read);
-          if (readFromStream < 0) {
-            break;
-          }
-          streamSize += readFromStream;
-          read += readFromStream;
-          if (read == buffer.length) {
-            processor.process(buffer);
-            read = 0;
-          }
+    List<Long> processDataSources(
+            List<DataSourceHolder> sources, int pieceSize, Processor processor) throws IOException {
+        List<Long> sourcesSizes = new ArrayList<Long>();
+        byte[] buffer = new byte[pieceSize];
+        int read = 0;
+        for (DataSourceHolder source : sources) {
+            long streamSize = 0;
+            InputStream stream = source.getStream();
+            try {
+                while (true) {
+                    int readFromStream = stream.read(buffer, read, buffer.length - read);
+                    if (readFromStream < 0) {
+                        break;
+                    }
+                    streamSize += readFromStream;
+                    read += readFromStream;
+                    if (read == buffer.length) {
+                        processor.process(buffer);
+                        read = 0;
+                    }
+                }
+            } finally {
+                source.close();
+                sourcesSizes.add(streamSize);
+            }
         }
-      } finally {
-        source.close();
-        sourcesSizes.add(streamSize);
-      }
-    }
-    if (read > 0) {
-      processor.process(Arrays.copyOf(buffer, read));
+        if (read > 0) {
+            processor.process(Arrays.copyOf(buffer, read));
+        }
+
+        return sourcesSizes;
     }
 
-    return sourcesSizes;
-  }
+    interface Processor {
 
-  interface Processor {
-
-    /**
-     * Invoked when next piece is received from data source. Array will be overwritten
-     * after invocation this method (next piece will be read in same array). So multi-threading
-     * implementations must create copy of array and work with the copy.
-     *
-     * @param buffer byte array which contains bytes from data sources.
-     *               length of array equals piece size excluding last piece
-     */
-    void process(byte[] buffer);
-
-  }
+        /**
+         * Invoked when next piece is received from data source. Array will be overwritten after
+         * invocation this method (next piece will be read in same array). So multi-threading
+         * implementations must create copy of array and work with the copy.
+         *
+         * @param buffer byte array which contains bytes from data sources. length of array equals
+         *     piece size excluding last piece
+         */
+        void process(byte[] buffer);
+    }
 }

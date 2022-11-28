@@ -6,14 +6,13 @@ import java.util.BitSet;
 
 public interface PieceStorage extends Closeable {
 
-  void savePiece(int pieceIndex, byte[] pieceData) throws IOException;
+    void savePiece(int pieceIndex, byte[] pieceData) throws IOException;
 
-  byte[] readPiecePart(int pieceIndex, int offset, int length) throws IOException;
+    byte[] readPiecePart(int pieceIndex, int offset, int length) throws IOException;
 
-  BitSet getAvailablePieces();
+    BitSet getAvailablePieces();
 
-  boolean isFinished();
+    boolean isFinished();
 
-  void closeFully() throws IOException;
-
+    void closeFully() throws IOException;
 }

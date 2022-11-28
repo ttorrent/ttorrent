@@ -25,17 +25,17 @@ import java.util.List;
 
 public class TrackerClientFactoryImpl implements TrackerClientFactory {
 
-  @Override
-  public TrackerClient createTrackerClient(List<Peer> peers, URI tracker) throws UnknownHostException, UnknownServiceException {
-    String scheme = tracker.getScheme();
+    @Override
+    public TrackerClient createTrackerClient(List<Peer> peers, URI tracker)
+            throws UnknownHostException, UnknownServiceException {
+        String scheme = tracker.getScheme();
 
-    if ("http".equals(scheme) || "https".equals(scheme)) {
-      return new HTTPTrackerClient(peers, tracker);
-    } else if ("udp".equals(scheme)) {
-      return new UDPTrackerClient(peers, tracker);
+        if ("http".equals(scheme) || "https".equals(scheme)) {
+            return new HTTPTrackerClient(peers, tracker);
+        } else if ("udp".equals(scheme)) {
+            return new UDPTrackerClient(peers, tracker);
+        }
+
+        throw new UnknownServiceException("Unsupported announce scheme: " + scheme + "!");
     }
-
-    throw new UnknownServiceException(
-            "Unsupported announce scheme: " + scheme + "!");
-  }
 }

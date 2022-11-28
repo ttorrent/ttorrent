@@ -7,71 +7,68 @@ import java.util.Arrays;
 
 public class ByteArrayStorage implements TorrentByteStorage {
 
-  private final byte[] array;
-  private boolean finished = false;
-  private boolean isBlank;
+    private final byte[] array;
+    private boolean finished = false;
+    private boolean isBlank;
 
-  public ByteArrayStorage(int maxSize) {
-    array = new byte[maxSize];
-    isBlank = true;
-  }
-
-  @Override
-  public void open(boolean seeder) {
-  }
-
-  private int intPosition(long position) {
-    if (position > Integer.MAX_VALUE || position < 0) {
-      throw new IllegalArgumentException("Position is too large");
+    public ByteArrayStorage(int maxSize) {
+        array = new byte[maxSize];
+        isBlank = true;
     }
-    return (int) position;
-  }
 
-  @Override
-  public int read(ByteBuffer buffer, long position) {
+    @Override
+    public void open(boolean seeder) {}
 
-    int pos = intPosition(position);
-    int bytesCount = buffer.remaining();
-    buffer.put(Arrays.copyOfRange(array, pos, pos + bytesCount));
-    return bytesCount;
-  }
+    private int intPosition(long position) {
+        if (position > Integer.MAX_VALUE || position < 0) {
+            throw new IllegalArgumentException("Position is too large");
+        }
+        return (int) position;
+    }
 
-  @Override
-  public int write(ByteBuffer block, long position) {
-    int pos = intPosition(position);
-    int bytesCount = block.remaining();
-    byte[] toWrite = new byte[bytesCount];
-    block.get(toWrite);
-    System.arraycopy(toWrite, 0, array, pos, toWrite.length);
-    isBlank = false;
-    return bytesCount;
-  }
+    @Override
+    public int read(ByteBuffer buffer, long position) {
 
-  @Override
-  public void finish() {
-    finished = true;
-  }
+        int pos = intPosition(position);
+        int bytesCount = buffer.remaining();
+        buffer.put(Arrays.copyOfRange(array, pos, pos + bytesCount));
+        return bytesCount;
+    }
 
-  @Override
-  public boolean isFinished() {
-    return finished;
-  }
+    @Override
+    public int write(ByteBuffer block, long position) {
+        int pos = intPosition(position);
+        int bytesCount = block.remaining();
+        byte[] toWrite = new byte[bytesCount];
+        block.get(toWrite);
+        System.arraycopy(toWrite, 0, array, pos, toWrite.length);
+        isBlank = false;
+        return bytesCount;
+    }
 
-  @Override
-  public boolean isBlank(long position, long size) {
-    return isBlank;
-  }
+    @Override
+    public void finish() {
+        finished = true;
+    }
 
-  @Override
-  public boolean isBlank() {
-    return isBlank;
-  }
+    @Override
+    public boolean isFinished() {
+        return finished;
+    }
 
-  @Override
-  public void delete() {
-  }
+    @Override
+    public boolean isBlank(long position, long size) {
+        return isBlank;
+    }
 
-  @Override
-  public void close() {
-  }
+    @Override
+    public boolean isBlank() {
+        return isBlank;
+    }
+
+    @Override
+    public void delete() {}
+
+    @Override
+    public void close() {}
 }

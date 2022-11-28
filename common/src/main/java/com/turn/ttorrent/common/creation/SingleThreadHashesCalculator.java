@@ -24,21 +24,22 @@ import java.util.List;
 
 public class SingleThreadHashesCalculator implements PiecesHashesCalculator {
 
-  @Override
-  public HashingResult calculateHashes(List<DataSourceHolder> sources, int pieceSize) throws IOException {
-    final List<byte[]> hashes = new ArrayList<byte[]>();
-    List<Long> sourcesSizes = CommonHashingCalculator.INSTANCE.processDataSources(
-            sources,
-            pieceSize,
-            new CommonHashingCalculator.Processor() {
-              @Override
-              public void process(byte[] buffer) {
-                byte[] hash = TorrentUtils.calculateSha1Hash(buffer);
-                hashes.add(hash);
-              }
-            }
-    );
+    @Override
+    public HashingResult calculateHashes(List<DataSourceHolder> sources, int pieceSize)
+            throws IOException {
+        final List<byte[]> hashes = new ArrayList<byte[]>();
+        List<Long> sourcesSizes =
+                CommonHashingCalculator.INSTANCE.processDataSources(
+                        sources,
+                        pieceSize,
+                        new CommonHashingCalculator.Processor() {
+                            @Override
+                            public void process(byte[] buffer) {
+                                byte[] hash = TorrentUtils.calculateSha1Hash(buffer);
+                                hashes.add(hash);
+                            }
+                        });
 
-    return new HashingResult(hashes, sourcesSizes);
-  }
+        return new HashingResult(hashes, sourcesSizes);
+    }
 }

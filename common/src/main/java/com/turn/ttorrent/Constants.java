@@ -19,25 +19,22 @@ package com.turn.ttorrent;
 import java.nio.ByteBuffer;
 
 /**
- * @author Sergey.Pak
- * Date: 9/19/13
- * Time: 2:57 PM
+ * @author Sergey.Pak Date: 9/19/13 Time: 2:57 PM
  */
 public class Constants {
-  public static final int DEFAULT_ANNOUNCE_INTERVAL_SEC = 15;
+    public static final int DEFAULT_ANNOUNCE_INTERVAL_SEC = 15;
 
-  public final static int DEFAULT_SOCKET_CONNECTION_TIMEOUT_MILLIS = 100000;
-  public static final int DEFAULT_CONNECTION_TIMEOUT_MILLIS = 10000;
+    public static final int DEFAULT_SOCKET_CONNECTION_TIMEOUT_MILLIS = 100000;
+    public static final int DEFAULT_CONNECTION_TIMEOUT_MILLIS = 10000;
 
-  public static final int DEFAULT_MAX_CONNECTION_COUNT = 100;
+    public static final int DEFAULT_MAX_CONNECTION_COUNT = 100;
 
-  public static final ByteBuffer EMPTY_BUFFER = ByteBuffer.allocate(0);
+    public static final ByteBuffer EMPTY_BUFFER = ByteBuffer.allocate(0);
 
-  public static final int DEFAULT_SELECTOR_SELECT_TIMEOUT_MILLIS = 10000;
-  public static final int DEFAULT_CLEANUP_RUN_TIMEOUT_MILLIS = 120000;
+    public static final int DEFAULT_SELECTOR_SELECT_TIMEOUT_MILLIS = 10000;
+    public static final int DEFAULT_CLEANUP_RUN_TIMEOUT_MILLIS = 120000;
 
-  public static final String BYTE_ENCODING = "ISO-8859-1";
+    public static final String BYTE_ENCODING = "ISO-8859-1";
 
-  public static final int PIECE_HASH_SIZE = 20;
-
+    public static final int PIECE_HASH_SIZE = 20;
 }

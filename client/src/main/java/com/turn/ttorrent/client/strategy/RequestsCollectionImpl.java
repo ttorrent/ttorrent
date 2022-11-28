@@ -24,19 +24,19 @@ import java.util.Map;
 
 public class RequestsCollectionImpl implements RequestsCollection {
 
-  private final Map<Piece, List<SharingPeer>> selectedPieces;
+    private final Map<Piece, List<SharingPeer>> selectedPieces;
 
-  public RequestsCollectionImpl(Map<Piece, List<SharingPeer>> selectedPieces) {
-    this.selectedPieces = selectedPieces;
-  }
-
-  @Override
-  public void sendAllRequests() {
-    for (Map.Entry<Piece, List<SharingPeer>> entry : selectedPieces.entrySet()) {
-      Piece piece = entry.getKey();
-      for (SharingPeer sharingPeer : entry.getValue()) {
-        sharingPeer.downloadPiece(piece);
-      }
+    public RequestsCollectionImpl(Map<Piece, List<SharingPeer>> selectedPieces) {
+        this.selectedPieces = selectedPieces;
     }
-  }
+
+    @Override
+    public void sendAllRequests() {
+        for (Map.Entry<Piece, List<SharingPeer>> entry : selectedPieces.entrySet()) {
+            Piece piece = entry.getKey();
+            for (SharingPeer sharingPeer : entry.getValue()) {
+                sharingPeer.downloadPiece(piece);
+            }
+        }
+    }
 }

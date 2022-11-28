@@ -11,6 +11,9 @@ public class TestLoggingListener implements IInvokedMethodListener {
 
     @Override
     public void beforeInvocation(IInvokedMethod method, ITestResult testResult) {
-        log.info("Entering {}.{}", method.getTestMethod().getRealClass().getSimpleName(), method.getTestMethod().getMethodName());
+        log.info(
+                "Entering {}.{}",
+                method.getTestMethod().getRealClass().getSimpleName(),
+                method.getTestMethod().getMethodName());
     }
 }

@@ -21,10 +21,9 @@ import java.nio.channels.Selector;
 
 public interface SelectorFactory {
 
-  /**
-   * @return new {@link Selector} instance
-   * @throws IOException if any io error occurs
-   */
-  Selector newSelector() throws IOException;
-
+    /**
+     * @return new {@link Selector} instance
+     * @throws IOException if any io error occurs
+     */
+    Selector newSelector() throws IOException;
 }

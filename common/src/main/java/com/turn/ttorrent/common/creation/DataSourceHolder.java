@@ -22,14 +22,14 @@ import java.io.InputStream;
 
 public interface DataSourceHolder extends Closeable {
 
-  /**
-   * provides {@link InputStream} associated with the holder. Holder can just store reference to stream or create
-   * new stream from some source (e.g. {@link java.io.FileInputStream} from {@link java.io.File}) on first invocation.
-   *
-   * @return {@link InputStream} associated with the holder.
-   * @throws IOException if io error occurs in creating new stream from source.
-   *                     IO exception can be thrown only on first invocation
-   */
-  InputStream getStream() throws IOException;
-
+    /**
+     * provides {@link InputStream} associated with the holder. Holder can just store reference to
+     * stream or create new stream from some source (e.g. {@link java.io.FileInputStream} from
+     * {@link java.io.File}) on first invocation.
+     *
+     * @return {@link InputStream} associated with the holder.
+     * @throws IOException if io error occurs in creating new stream from source. IO exception can
+     *     be thrown only on first invocation
+     */
+    InputStream getStream() throws IOException;
 }

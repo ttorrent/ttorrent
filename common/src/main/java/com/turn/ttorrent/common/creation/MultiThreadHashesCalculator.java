@@ -29,52 +29,57 @@ import java.util.concurrent.Future;
 
 public class MultiThreadHashesCalculator implements PiecesHashesCalculator {
 
-  private final ExecutorService executor;
-  private final int maxInMemoryPieces;
+    private final ExecutorService executor;
+    private final int maxInMemoryPieces;
 
-  public MultiThreadHashesCalculator(ExecutorService executor, int maxInMemoryPieces) {
-    this.executor = executor;
-    this.maxInMemoryPieces = maxInMemoryPieces;
-  }
-
-  @Override
-  public HashingResult calculateHashes(List<DataSourceHolder> sources, int pieceSize) throws IOException {
-    final List<byte[]> hashes = new ArrayList<byte[]>();
-    final List<Future<byte[]>> futures = new ArrayList<Future<byte[]>>();
-    List<Long> sourcesSizes = CommonHashingCalculator.INSTANCE.processDataSources(
-            sources,
-            pieceSize,
-            new CommonHashingCalculator.Processor() {
-              @Override
-              public void process(final byte[] buffer) {
-                awaitHashesCalculationAndStore(futures, hashes, maxInMemoryPieces);
-                final byte[] bufferCopy = Arrays.copyOf(buffer, buffer.length);
-                futures.add(executor.submit(new Callable<byte[]>() {
-                  @Override
-                  public byte[] call() {
-                    return TorrentUtils.calculateSha1Hash(bufferCopy);
-                  }
-                }));
-              }
-            }
-    );
-    awaitHashesCalculationAndStore(futures, hashes, 0);
-
-    return new HashingResult(hashes, sourcesSizes);
-  }
-
-  private void awaitHashesCalculationAndStore(List<Future<byte[]>> futures, List<byte[]> hashes, int count) {
-    while (futures.size() > count) {
-      byte[] hash;
-      try {
-        Future<byte[]> future = futures.remove(0);
-        hash = future.get();
-      } catch (InterruptedException e) {
-        throw new RuntimeException(e);
-      } catch (ExecutionException e) {
-        throw new RuntimeException(e);
-      }
-      hashes.add(hash);
+    public MultiThreadHashesCalculator(ExecutorService executor, int maxInMemoryPieces) {
+        this.executor = executor;
+        this.maxInMemoryPieces = maxInMemoryPieces;
     }
-  }
+
+    @Override
+    public HashingResult calculateHashes(List<DataSourceHolder> sources, int pieceSize)
+            throws IOException {
+        final List<byte[]> hashes = new ArrayList<byte[]>();
+        final List<Future<byte[]>> futures = new ArrayList<Future<byte[]>>();
+        List<Long> sourcesSizes =
+                CommonHashingCalculator.INSTANCE.processDataSources(
+                        sources,
+                        pieceSize,
+                        new CommonHashingCalculator.Processor() {
+                            @Override
+                            public void process(final byte[] buffer) {
+                                awaitHashesCalculationAndStore(futures, hashes, maxInMemoryPieces);
+                                final byte[] bufferCopy = Arrays.copyOf(buffer, buffer.length);
+                                futures.add(
+                                        executor.submit(
+                                                new Callable<byte[]>() {
+                                                    @Override
+                                                    public byte[] call() {
+                                                        return TorrentUtils.calculateSha1Hash(
+                                                                bufferCopy);
+                                                    }
+                                                }));
+                            }
+                        });
+        awaitHashesCalculationAndStore(futures, hashes, 0);
+
+        return new HashingResult(hashes, sourcesSizes);
+    }
+
+    private void awaitHashesCalculationAndStore(
+            List<Future<byte[]>> futures, List<byte[]> hashes, int count) {
+        while (futures.size() > count) {
+            byte[] hash;
+            try {
+                Future<byte[]> future = futures.remove(0);
+                hash = future.get();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } catch (ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+            hashes.add(hash);
+        }
+    }
 }

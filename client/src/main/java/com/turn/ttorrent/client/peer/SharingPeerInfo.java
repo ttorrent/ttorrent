@@ -5,18 +5,15 @@ import com.turn.ttorrent.common.TorrentHash;
 import java.nio.ByteBuffer;
 
 /**
- * @author Sergey.Pak
- * Date: 8/9/13
- * Time: 6:40 PM
+ * @author Sergey.Pak Date: 8/9/13 Time: 6:40 PM
  */
 public interface SharingPeerInfo {
 
-  String getIp();
+    String getIp();
 
-  int getPort();
+    int getPort();
 
-  TorrentHash getTorrentHash();
+    TorrentHash getTorrentHash();
 
-  ByteBuffer getPeerId();
-
+    ByteBuffer getPeerId();
 }

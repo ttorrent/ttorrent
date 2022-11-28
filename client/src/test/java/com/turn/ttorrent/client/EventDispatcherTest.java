@@ -16,60 +16,60 @@
 
 package com.turn.ttorrent.client;
 
+import static org.mockito.Mockito.mock;
+import static org.testng.Assert.assertEquals;
+
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertEquals;
-
 @Test
 public class EventDispatcherTest {
 
-  private EventDispatcher eventDispatcher;
-  private PeerInformation peerInfo;
-  private PieceInformation pieceInfo;
+    private EventDispatcher eventDispatcher;
+    private PeerInformation peerInfo;
+    private PieceInformation pieceInfo;
 
-  @BeforeMethod
-  public void setUp() {
-    eventDispatcher = new EventDispatcher();
+    @BeforeMethod
+    public void setUp() {
+        eventDispatcher = new EventDispatcher();
 
-    peerInfo = mock(PeerInformation.class);
-    pieceInfo = mock(PieceInformation.class);
-  }
-
-  public void testWithoutListeners() {
-
-    eventDispatcher.multicaster().downloadFailed(new RuntimeException());
-    eventDispatcher.multicaster().peerConnected(peerInfo);
-    eventDispatcher.multicaster().validationComplete(1, 4);
-    eventDispatcher.multicaster().pieceDownloaded(pieceInfo, peerInfo);
-    eventDispatcher.multicaster().downloadComplete();
-    eventDispatcher.multicaster().pieceReceived(pieceInfo, peerInfo);
-    eventDispatcher.multicaster().peerDisconnected(peerInfo);
-  }
-
-  public void testInvocation() {
-
-    final AtomicInteger invocationCount = new AtomicInteger();
-    int count = 5;
-    for (int i = 0; i < count; i++) {
-      eventDispatcher.addListener(new TorrentListenerWrapper() {
-        @Override
-        public void downloadComplete() {
-          invocationCount.incrementAndGet();
-        }
-      });
+        peerInfo = mock(PeerInformation.class);
+        pieceInfo = mock(PieceInformation.class);
     }
 
-    eventDispatcher.multicaster().peerConnected(peerInfo);
+    public void testWithoutListeners() {
 
-    assertEquals(invocationCount.get(), 0);
+        eventDispatcher.multicaster().downloadFailed(new RuntimeException());
+        eventDispatcher.multicaster().peerConnected(peerInfo);
+        eventDispatcher.multicaster().validationComplete(1, 4);
+        eventDispatcher.multicaster().pieceDownloaded(pieceInfo, peerInfo);
+        eventDispatcher.multicaster().downloadComplete();
+        eventDispatcher.multicaster().pieceReceived(pieceInfo, peerInfo);
+        eventDispatcher.multicaster().peerDisconnected(peerInfo);
+    }
 
-    eventDispatcher.multicaster().downloadComplete();
+    public void testInvocation() {
 
-    assertEquals(invocationCount.get(), count);
+        final AtomicInteger invocationCount = new AtomicInteger();
+        int count = 5;
+        for (int i = 0; i < count; i++) {
+            eventDispatcher.addListener(
+                    new TorrentListenerWrapper() {
+                        @Override
+                        public void downloadComplete() {
+                            invocationCount.incrementAndGet();
+                        }
+                    });
+        }
 
-  }
+        eventDispatcher.multicaster().peerConnected(peerInfo);
+
+        assertEquals(invocationCount.get(), 0);
+
+        eventDispatcher.multicaster().downloadComplete();
+
+        assertEquals(invocationCount.get(), count);
+    }
 }

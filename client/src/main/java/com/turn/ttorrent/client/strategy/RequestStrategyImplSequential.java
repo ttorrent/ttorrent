@@ -11,12 +11,12 @@ import java.util.BitSet;
  */
 public class RequestStrategyImplSequential implements RequestStrategy {
 
-  @Override
-  public Piece choosePiece(BitSet interesting, Piece[] pieces) {
+    @Override
+    public Piece choosePiece(BitSet interesting, Piece[] pieces) {
 
-    for (Piece p : pieces) {
-      if (interesting.get(p.getIndex())) return p;
+        for (Piece p : pieces) {
+            if (interesting.get(p.getIndex())) return p;
+        }
+        return null;
     }
-    return null;
-  }
 }

@@ -20,19 +20,19 @@ import java.util.List;
 
 public class HashingResult {
 
-  private final List<byte[]> hashes;
-  private final List<Long> sourceSizes;
+    private final List<byte[]> hashes;
+    private final List<Long> sourceSizes;
 
-  public HashingResult(List<byte[]> hashes, List<Long> sourceSizes) {
-    this.hashes = hashes;
-    this.sourceSizes = sourceSizes;
-  }
+    public HashingResult(List<byte[]> hashes, List<Long> sourceSizes) {
+        this.hashes = hashes;
+        this.sourceSizes = sourceSizes;
+    }
 
-  public List<byte[]> getHashes() {
-    return hashes;
-  }
+    public List<byte[]> getHashes() {
+        return hashes;
+    }
 
-  public List<Long> getSourceSizes() {
-    return sourceSizes;
-  }
+    public List<Long> getSourceSizes() {
+        return sourceSizes;
+    }
 }

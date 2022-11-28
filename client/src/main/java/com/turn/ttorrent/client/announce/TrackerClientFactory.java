@@ -25,14 +25,14 @@ import java.util.List;
 
 public interface TrackerClientFactory {
 
-  /**
-   * Create a {@link TrackerClient} announcing to the given tracker address.
-   *
-   * @param peers   The list peer the tracker client will announce on behalf of.
-   * @param tracker The tracker address as a {@link java.net.URI}.
-   * @throws UnknownHostException    If the tracker address is invalid.
-   * @throws UnknownServiceException If the tracker protocol is not supported.
-   */
-  TrackerClient createTrackerClient(List<Peer> peers, URI tracker) throws UnknownHostException, UnknownServiceException;
-
+    /**
+     * Create a {@link TrackerClient} announcing to the given tracker address.
+     *
+     * @param peers The list peer the tracker client will announce on behalf of.
+     * @param tracker The tracker address as a {@link java.net.URI}.
+     * @throws UnknownHostException If the tracker address is invalid.
+     * @throws UnknownServiceException If the tracker protocol is not supported.
+     */
+    TrackerClient createTrackerClient(List<Peer> peers, URI tracker)
+            throws UnknownHostException, UnknownServiceException;
 }

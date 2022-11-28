@@ -23,6 +23,5 @@ import java.util.List;
 
 public interface EndGameStrategy {
 
-  RequestsCollection collectRequests(Piece[] allPieces, List<SharingPeer> connectedPeers);
-
+    RequestsCollection collectRequests(Piece[] allPieces, List<SharingPeer> connectedPeers);
 }

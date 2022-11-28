@@ -23,8 +23,8 @@ import java.nio.channels.Selector;
 
 public class SelectorFactoryImpl implements SelectorFactory {
 
-  @Override
-  public Selector newSelector() throws IOException {
-    return Selector.open();
-  }
+    @Override
+    public Selector newSelector() throws IOException {
+        return Selector.open();
+    }
 }

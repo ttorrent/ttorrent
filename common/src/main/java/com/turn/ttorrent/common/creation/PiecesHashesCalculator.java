@@ -21,22 +21,17 @@ import java.util.List;
 
 public interface PiecesHashesCalculator {
 
-  /**
-   * calculates sha1 hashes of each chunk with specified piece size
-   * and returns list of hashes and stream's sizes. If one stream is ended and piece size threshold is not reached
-   * implementation must read bytes from next stream
-   * For example if source list is 3 streams with next bytes:
-   * first stream: [1,2,3]
-   * second stream: [4,5,6,7]
-   * third stream: [8,9]
-   * and pieceSize = 4
-   * result must contain source size [3,4,2] and hashes: [sha1(1,2,3,4), sha1(5,6,7,8), sha1(9)]
-   *
-   * @param sources   list of input stream's providers
-   * @param pieceSize size of one piece
-   * @return see above
-   * @throws IOException if IO error occurs in reading from streams
-   */
-  HashingResult calculateHashes(List<DataSourceHolder> sources, int pieceSize) throws IOException;
-
+    /**
+     * calculates sha1 hashes of each chunk with specified piece size and returns list of hashes and
+     * stream's sizes. If one stream is ended and piece size threshold is not reached implementation
+     * must read bytes from next stream For example if source list is 3 streams with next bytes:
+     * first stream: [1,2,3] second stream: [4,5,6,7] third stream: [8,9] and pieceSize = 4 result
+     * must contain source size [3,4,2] and hashes: [sha1(1,2,3,4), sha1(5,6,7,8), sha1(9)]
+     *
+     * @param sources list of input stream's providers
+     * @param pieceSize size of one piece
+     * @return see above
+     * @throws IOException if IO error occurs in reading from streams
+     */
+    HashingResult calculateHashes(List<DataSourceHolder> sources, int pieceSize) throws IOException;
 }

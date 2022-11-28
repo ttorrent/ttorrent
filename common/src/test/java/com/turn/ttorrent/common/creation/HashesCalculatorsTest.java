@@ -16,7 +16,12 @@
 
 package com.turn.ttorrent.common.creation;
 
+import static org.testng.Assert.assertEquals;
+
+import static java.util.Arrays.asList;
+
 import com.turn.ttorrent.common.TorrentUtils;
+
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -32,187 +37,189 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static java.util.Arrays.asList;
-import static org.testng.Assert.assertEquals;
-
 @Test
 public class HashesCalculatorsTest {
 
-  private List<? extends PiecesHashesCalculator> implementations;
-  private ExecutorService executor;
+    private List<? extends PiecesHashesCalculator> implementations;
+    private ExecutorService executor;
 
-  @BeforeMethod
-  public void setUp() {
-    executor = Executors.newFixedThreadPool(4);
-    implementations = Arrays.asList(
-            new SingleThreadHashesCalculator(),
-            new MultiThreadHashesCalculator(executor, 3),
-            new MultiThreadHashesCalculator(executor, 20),
-            new MultiThreadHashesCalculator(executor, 1)
-    );
-  }
+    @BeforeMethod
+    public void setUp() {
+        executor = Executors.newFixedThreadPool(4);
+        implementations =
+                Arrays.asList(
+                        new SingleThreadHashesCalculator(),
+                        new MultiThreadHashesCalculator(executor, 3),
+                        new MultiThreadHashesCalculator(executor, 20),
+                        new MultiThreadHashesCalculator(executor, 1));
+    }
 
-  @AfterMethod
-  public void tearDown() throws InterruptedException {
-    executor.shutdown();
-    executor.awaitTermination(10, TimeUnit.SECONDS);
-  }
+    @AfterMethod
+    public void tearDown() throws InterruptedException {
+        executor.shutdown();
+        executor.awaitTermination(10, TimeUnit.SECONDS);
+    }
 
-  public void testEmptySource() throws IOException {
-    List<byte[]> sourceBytes = new ArrayList<byte[]>();
-    sourceBytes.add(new byte[]{1, 2});
-    sourceBytes.add(new byte[]{});
-    sourceBytes.add(new byte[]{3, 4});
+    public void testEmptySource() throws IOException {
+        List<byte[]> sourceBytes = new ArrayList<byte[]>();
+        sourceBytes.add(new byte[] {1, 2});
+        sourceBytes.add(new byte[] {});
+        sourceBytes.add(new byte[] {3, 4});
 
-    HashingResult expected = new HashingResult(Collections.singletonList(
-            TorrentUtils.calculateSha1Hash(new byte[]{1, 2, 3, 4})),
-            asList(2L, 0L, 2L)
-    );
-    verifyImplementationsResults(sourceBytes, 512, expected);
-  }
+        HashingResult expected =
+                new HashingResult(
+                        Collections.singletonList(
+                                TorrentUtils.calculateSha1Hash(new byte[] {1, 2, 3, 4})),
+                        asList(2L, 0L, 2L));
+        verifyImplementationsResults(sourceBytes, 512, expected);
+    }
 
-  public void testStreamsAsPiece() throws IOException {
-    List<byte[]> sourceBytes = new ArrayList<byte[]>();
-    sourceBytes.add(new byte[]{1, 2, 3, 4});
-    sourceBytes.add(new byte[]{5, 6, 7, 8});
+    public void testStreamsAsPiece() throws IOException {
+        List<byte[]> sourceBytes = new ArrayList<byte[]>();
+        sourceBytes.add(new byte[] {1, 2, 3, 4});
+        sourceBytes.add(new byte[] {5, 6, 7, 8});
 
-    HashingResult expected = new HashingResult(asList(
-            TorrentUtils.calculateSha1Hash(new byte[]{1, 2, 3, 4}),
-            TorrentUtils.calculateSha1Hash(new byte[]{5, 6, 7, 8})),
-            asList(4L, 4L)
-    );
-    verifyImplementationsResults(sourceBytes, 4, expected);
-  }
+        HashingResult expected =
+                new HashingResult(
+                        asList(
+                                TorrentUtils.calculateSha1Hash(new byte[] {1, 2, 3, 4}),
+                                TorrentUtils.calculateSha1Hash(new byte[] {5, 6, 7, 8})),
+                        asList(4L, 4L));
+        verifyImplementationsResults(sourceBytes, 4, expected);
+    }
 
-  public void testReadingNotFullyBuffer() throws IOException {
-    List<byte[]> sourceBytes = new ArrayList<byte[]>();
-    sourceBytes.add(new byte[]{1, 2, 3, 4, 5, 6, 7});
-    HashingResult expected = new HashingResult(asList(
-            TorrentUtils.calculateSha1Hash(new byte[]{1, 2, 3, 4, 5}),
-            TorrentUtils.calculateSha1Hash(new byte[]{6, 7})),
-            Collections.singletonList(7L)
-    );
+    public void testReadingNotFullyBuffer() throws IOException {
+        List<byte[]> sourceBytes = new ArrayList<byte[]>();
+        sourceBytes.add(new byte[] {1, 2, 3, 4, 5, 6, 7});
+        HashingResult expected =
+                new HashingResult(
+                        asList(
+                                TorrentUtils.calculateSha1Hash(new byte[] {1, 2, 3, 4, 5}),
+                                TorrentUtils.calculateSha1Hash(new byte[] {6, 7})),
+                        Collections.singletonList(7L));
 
-    final int maxToRead = 2;
-    List<HashingResult> hashingResults = new ArrayList<HashingResult>();
-    for (PiecesHashesCalculator implementation : implementations) {
-      List<DataSourceHolder> sources = new ArrayList<DataSourceHolder>();
-      for (byte[] sourceByte : sourceBytes) {
-        final InputStream is = new ByteArrayInputStream(sourceByte) {
-          @Override
-          public synchronized int read(byte[] b, int off, int len) {
-            if (len <= maxToRead) {
-              return super.read(b, off, len);
+        final int maxToRead = 2;
+        List<HashingResult> hashingResults = new ArrayList<HashingResult>();
+        for (PiecesHashesCalculator implementation : implementations) {
+            List<DataSourceHolder> sources = new ArrayList<DataSourceHolder>();
+            for (byte[] sourceByte : sourceBytes) {
+                final InputStream is =
+                        new ByteArrayInputStream(sourceByte) {
+                            @Override
+                            public synchronized int read(byte[] b, int off, int len) {
+                                if (len <= maxToRead) {
+                                    return super.read(b, off, len);
+                                }
+                                if (pos >= count) {
+                                    return -1;
+                                }
+
+                                int avail = count - pos;
+                                if (len > avail) {
+                                    len = avail;
+                                }
+                                if (len <= 0) {
+                                    return 0;
+                                }
+                                System.arraycopy(buf, pos, b, off, maxToRead);
+                                pos += maxToRead;
+                                return maxToRead;
+                            }
+                        };
+                sources.add(
+                        new DataSourceHolder() {
+                            @Override
+                            public InputStream getStream() {
+                                return is;
+                            }
+
+                            @Override
+                            public void close() throws IOException {
+                                is.close();
+                            }
+                        });
             }
-            if (pos >= count) {
-              return -1;
+            hashingResults.add(implementation.calculateHashes(sources, 5));
+        }
+        for (HashingResult actual : hashingResults) {
+            assertHashingResult(actual, expected);
+        }
+    }
+
+    public void testWithSmallSource() throws IOException {
+        List<byte[]> sourceBytes = new ArrayList<byte[]>();
+        sourceBytes.add(new byte[] {0, 1, 2, 3, 4, 5, 4});
+        sourceBytes.add(new byte[] {-1, -2});
+        sourceBytes.add(new byte[] {6, 7, 8, 9, 10});
+        sourceBytes.add(new byte[] {1, 2, 3, 4});
+
+        HashingResult expected =
+                new HashingResult(
+                        asList(
+                                TorrentUtils.calculateSha1Hash(new byte[] {0, 1, 2, 3, 4, 5}),
+                                TorrentUtils.calculateSha1Hash(new byte[] {4, -1, -2, 6, 7, 8}),
+                                TorrentUtils.calculateSha1Hash(new byte[] {9, 10, 1, 2, 3, 4})),
+                        asList(7L, 2L, 5L, 4L));
+        verifyImplementationsResults(sourceBytes, 6, expected);
+    }
+
+    public void testOneLargeSource() throws IOException {
+
+        int size = 1024 * 1024 * 100; // 100mb
+        byte[] sourceBytes = new byte[size];
+        List<byte[]> hashes = new ArrayList<byte[]>();
+        final int pieceSize = 128 * 1024; // 128kb
+        for (int i = 0; i < sourceBytes.length; i++) {
+            sourceBytes[i] = (byte) (i * i);
+            if (i % pieceSize == 0 && i > 0) {
+                byte[] forHashing = Arrays.copyOfRange(sourceBytes, i - pieceSize, i);
+                hashes.add(TorrentUtils.calculateSha1Hash(forHashing));
             }
+        }
+        hashes.add(
+                TorrentUtils.calculateSha1Hash(
+                        Arrays.copyOfRange(sourceBytes, hashes.size() * pieceSize, size)));
 
-            int avail = count - pos;
-            if (len > avail) {
-              len = avail;
+        HashingResult expected = new HashingResult(hashes, Collections.singletonList((long) size));
+
+        verifyImplementationsResults(Collections.singletonList(sourceBytes), pieceSize, expected);
+    }
+
+    private void verifyImplementationsResults(
+            List<byte[]> sourceBytes, int pieceSize, HashingResult expected) throws IOException {
+        List<HashingResult> hashingResults = new ArrayList<HashingResult>();
+        for (PiecesHashesCalculator implementation : implementations) {
+            List<DataSourceHolder> sources = new ArrayList<DataSourceHolder>();
+            for (byte[] sourceByte : sourceBytes) {
+                addSource(sourceByte, sources);
             }
-            if (len <= 0) {
-              return 0;
-            }
-            System.arraycopy(buf, pos, b, off, maxToRead);
-            pos += maxToRead;
-            return maxToRead;
-          }
-        };
-        sources.add(new DataSourceHolder() {
-          @Override
-          public InputStream getStream() {
-            return is;
-          }
-
-          @Override
-          public void close() throws IOException {
-            is.close();
-          }
-        });
-      }
-      hashingResults.add(implementation.calculateHashes(sources, 5));
+            hashingResults.add(implementation.calculateHashes(sources, pieceSize));
+        }
+        for (HashingResult actual : hashingResults) {
+            assertHashingResult(actual, expected);
+        }
     }
-    for (HashingResult actual : hashingResults) {
-      assertHashingResult(actual, expected);
+
+    private void assertHashingResult(HashingResult actual, HashingResult expected) {
+
+        assertEquals(actual.getHashes().size(), expected.getHashes().size());
+        for (int i = 0; i < actual.getHashes().size(); i++) {
+            assertEquals(actual.getHashes().get(i), expected.getHashes().get(i));
+        }
+        assertEquals(actual.getSourceSizes(), expected.getSourceSizes());
     }
-  }
 
-  public void testWithSmallSource() throws IOException {
-    List<byte[]> sourceBytes = new ArrayList<byte[]>();
-    sourceBytes.add(new byte[]{0, 1, 2, 3, 4, 5, 4});
-    sourceBytes.add(new byte[]{-1, -2});
-    sourceBytes.add(new byte[]{6, 7, 8, 9, 10});
-    sourceBytes.add(new byte[]{1, 2, 3, 4});
+    private void addSource(byte[] bytes, List<DataSourceHolder> sources) {
+        final ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
+        sources.add(
+                new DataSourceHolder() {
+                    @Override
+                    public InputStream getStream() {
+                        return stream;
+                    }
 
-    HashingResult expected = new HashingResult(asList(
-            TorrentUtils.calculateSha1Hash(new byte[]{0, 1, 2, 3, 4, 5}),
-            TorrentUtils.calculateSha1Hash(new byte[]{4, -1, -2, 6, 7, 8}),
-            TorrentUtils.calculateSha1Hash(new byte[]{9, 10, 1, 2, 3, 4})),
-            asList(7L, 2L, 5L, 4L)
-    );
-    verifyImplementationsResults(sourceBytes, 6, expected);
-  }
-
-  public void testOneLargeSource() throws IOException {
-
-    int size = 1024 * 1024 * 100;//100mb
-    byte[] sourceBytes = new byte[size];
-    List<byte[]> hashes = new ArrayList<byte[]>();
-    final int pieceSize = 128 * 1024;//128kb
-    for (int i = 0; i < sourceBytes.length; i++) {
-      sourceBytes[i] = (byte) (i * i);
-      if (i % pieceSize == 0 && i > 0) {
-        byte[] forHashing = Arrays.copyOfRange(sourceBytes, i - pieceSize, i);
-        hashes.add(TorrentUtils.calculateSha1Hash(forHashing));
-      }
+                    @Override
+                    public void close() {}
+                });
     }
-    hashes.add(TorrentUtils.calculateSha1Hash(
-            Arrays.copyOfRange(sourceBytes, hashes.size() * pieceSize, size)
-    ));
-
-    HashingResult expected = new HashingResult(hashes, Collections.singletonList((long) size));
-
-    verifyImplementationsResults(Collections.singletonList(sourceBytes), pieceSize, expected);
-  }
-
-  private void verifyImplementationsResults(List<byte[]> sourceBytes,
-                                            int pieceSize,
-                                            HashingResult expected) throws IOException {
-    List<HashingResult> hashingResults = new ArrayList<HashingResult>();
-    for (PiecesHashesCalculator implementation : implementations) {
-      List<DataSourceHolder> sources = new ArrayList<DataSourceHolder>();
-      for (byte[] sourceByte : sourceBytes) {
-        addSource(sourceByte, sources);
-      }
-      hashingResults.add(implementation.calculateHashes(sources, pieceSize));
-    }
-    for (HashingResult actual : hashingResults) {
-      assertHashingResult(actual, expected);
-    }
-  }
-
-  private void assertHashingResult(HashingResult actual, HashingResult expected) {
-
-    assertEquals(actual.getHashes().size(), expected.getHashes().size());
-    for (int i = 0; i < actual.getHashes().size(); i++) {
-      assertEquals(actual.getHashes().get(i), expected.getHashes().get(i));
-    }
-    assertEquals(actual.getSourceSizes(), expected.getSourceSizes());
-  }
-
-  private void addSource(byte[] bytes, List<DataSourceHolder> sources) {
-    final ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
-    sources.add(new DataSourceHolder() {
-      @Override
-      public InputStream getStream() {
-        return stream;
-      }
-
-      @Override
-      public void close() {
-      }
-    });
-  }
 }
